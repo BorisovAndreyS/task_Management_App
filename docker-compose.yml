@@ -8,6 +8,8 @@ services:
     command: sh -c "npm install && npm start"
     ports:
       - "3000:3000"
+    networks:
+      - task-network
     depends_on:
       - backend
 
@@ -19,20 +21,28 @@ services:
     command: sh -c "pip install -r requirements.txt && flask run --host=0.0.0.0"
     ports:
       - "5000:5000"
+    networks:
+      - task-network
     environment:
       - FLASK_ENV=development
-      - DATABASE_URL=postgresql://postgres:password@db:5432/app_db
+      - DATABASE_URL=postgresql://taskuser:taskpassword@database:5432/taskdb
     depends_on:
-      - db
+      - database
 
-  db:
+  database:
     image: postgres:15-alpine
     volumes:
       - db_data:/var/lib/postgresql/data
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=app_db
+      - POSTGRES_USER=taskuser
+      - POSTGRES_PASSWORD=taskpassword
+      - POSTGRES_DB=taskdb
+    networks:
+      - task-network
 
 volumes:
   db_data:
+
+networks:
+  task-network:
+    driver: bridge
